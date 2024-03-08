@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import speakeasy from 'speakeasy';
 import Users from '../Models/Users/Users';
 
 // Function to create a new user
@@ -14,11 +15,15 @@ export const createUser = async (req: Request, res: Response) => {
             return res.status(400).json({ error: 'User already exists' });
         }
 
+        // Generate a 2FA secret for the user
+        const { base32: secret } = speakeasy.generateSecret();
+
         // Create a new user document
         const newUser = new Users({
             username,
             password,
-            email
+            email,
+            twoFactorAuthCode: secret // Save the generated 2FA secret to the user document
         });
 
         // Save the new user to the database
